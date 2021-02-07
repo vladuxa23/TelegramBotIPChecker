@@ -53,6 +53,7 @@ def getIPinfo(update, context):
 
     response = requests.get(f"http://ip-api.com/json/{text}")
     response = response.json()
+    print(response)
     flag_code = ""
     if response.get('countryCode') is None:
         flag_code == ":qu:"
@@ -60,23 +61,24 @@ def getIPinfo(update, context):
         flag_code = f":{response.get('countryCode').lower()}:"
 
     msg = f"""Информация:\n
-*Статус:* {response.get('status')}
-*Страна:* {flag.flagize(flag_code, subregions=True)}{response.get('country')}
-*Код страны:* {response.get('countryCode')}
-*Регион:* {response.get('regionName')}
-*Код региона:* {response.get('region')}
-*Город:* {response.get('city')}
-*Индекс:* {response.get('zip')}
-*Широта:* {response.get('lat')}
-*Долгота:* {response.get('lon')}
-*Врем. пояс:* {response.get('timezone')}
-*Провайдер:* {response.get('isp')}
-*Организация:* {response.get('org')}
-*Авт-ая система:* {response.get('as')}"""
+<b>Статус:</b> {response.get('status')}
+<b>Страна:</b> {flag.flagize(flag_code, subregions=True)} {response.get('country')}
+<b>Код страны:</b> {response.get('countryCode')}
+<b>Регион:</b> {response.get('regionName')}
+<b>Код региона:</b> {response.get('region')}
+<b>Город:</b> {response.get('city')}
+<b>Индекс:</b> {response.get('zip')}
+<b>Широта:</b> {response.get('lat')}
+<b>Долгота:</b> {response.get('lon')}
+<b>Врем. пояс:</b> {response.get('timezone')}
+<b>Провайдер:</b> {response.get('isp')}
+<b>Организация:</b> {response.get('org')}
+<b>Авт-ая система:</b> {response.get('as')}"""
 
     chatID = update.effective_chat.id
+    print(msg)
 
-    update.message.reply_text(msg, parse_mode="Markdown")
+    update.message.reply_text(msg, parse_mode="HTML")
     context.bot.send_location(chat_id=chatID, latitude=response.get('lat'), longitude=response.get('lon'))
 
 
