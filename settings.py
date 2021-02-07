@@ -1,1 +1,3 @@
-API_KEY = "1665297289:AAGv0gM6nTBe8whqoMWmpIVI0QaWz3wXb6w"
+import os
+
+API_KEY = os.environ["TOKEN"]

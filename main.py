@@ -1,12 +1,9 @@
 import flag
 import utils
-import emoji
 import logging
 import requests
 import settings
-# import handlers
 
-from emoji import emojize
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # BOT_NAME = @IPchecker23Bot
