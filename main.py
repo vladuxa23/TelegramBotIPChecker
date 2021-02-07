@@ -1,28 +1,18 @@
-import logging
-import pprint
-
-import emoji
 import flag
-
-from utils import getMainKeyboard
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from emoji import emojize
+import utils
+import emoji
+import logging
 import requests
 import settings
-
-
 # import handlers
 
-# BOT_NAME = BudgetFinancialMoney_Bot
+from emoji import emojize
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+# BOT_NAME = @IPchecker23Bot
 
 logging.basicConfig(filename="bot.log", level=logging.INFO)
 
-
-# PROXY = {"proxy_url": settings.PROXY_URL,
-#          "urllib3_proxy_kwargs": {"username": settings.PROXY_USERNAME, "password": settings.PROXY_PASSWORD}}
-#
-
-# http://ip-api.com/json/24.48.0.1
 
 def main():
     mybot = Updater(settings.API_KEY, use_context=True)  # , request_kwargs=PROXY)
@@ -30,16 +20,27 @@ def main():
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", hello))
     dp.add_handler(MessageHandler(Filters.regex('^(Проверить IP)$'), checkIP))
-    dp.add_handler(MessageHandler(Filters.regex(settings.IP_VALIDATION), getIPinfo))
+    dp.add_handler(MessageHandler(Filters.regex('^(О боте)$'), aboutBot))
+    dp.add_handler(MessageHandler(Filters.regex(utils.IP_VALIDATION), getIPinfo))
+    dp.add_handler(MessageHandler(Filters.text, brokenIP))
     logging.info("Bot successfully started")
 
     mybot.start_polling()
     mybot.idle()
 
 
+def brokenIP(update, context):
+    update.message.reply_text(f"IP-адрес не определён")
+
+
 def hello(update, context):
     userName = update.effective_user.first_name
-    update.message.reply_text(f"Здарвствуй, {userName}!", reply_markup=getMainKeyboard())
+    update.message.reply_text(f"Здарвствуй, {userName}!", reply_markup=utils.getMainKeyboard())
+
+
+def aboutBot(update, context):
+    update.message.reply_text(f"Бот предназначен для проверки IP-адреса. Всё что нужно для активации, "
+                              f"это ввести интересующий IP-адрес")
 
 
 def checkIP(update, context):
@@ -52,10 +53,11 @@ def getIPinfo(update, context):
 
     response = requests.get(f"http://ip-api.com/json/{text}")
     response = response.json()
-    # print(response)
-    flag_code = f":{response.get('countryCode').lower()}:"
-
-    # flag_emoji = emoji.emojize(flag_code, variant="emoji_type")
+    flag_code = ""
+    if response.get('countryCode') is None:
+        flag_code == ":qu:"
+    else:
+        flag_code = f":{response.get('countryCode').lower()}:"
 
     msg = f"""Информация:\n
 *Статус:* {response.get('status')}
@@ -72,7 +74,10 @@ def getIPinfo(update, context):
 *Организация:* {response.get('org')}
 *Авт-ая система:* {response.get('as')}"""
 
+    chatID = update.effective_chat.id
+
     update.message.reply_text(msg, parse_mode="Markdown")
+    context.bot.send_location(chat_id=chatID, latitude=response.get('lat'), longitude=response.get('lon'))
 
 
 if __name__ == "__main__":
